@@ -1,9 +1,20 @@
+import React, { useState } from "react";
+import Navbar from "./components/Navbar";
+import AuthModal from "./components/AuthModal";
+import Home from "./pages/Home";
+
 function App() {
+  const [authType, setAuthType] = useState(null);
+
   return (
-    <div className="flex items-center justify-center h-screen">
-      <h1 className="text-5xl font-bold text-blue-500">
-        Tailwind Working 🚀
-      </h1>
+    <div>
+      <Navbar openAuth={setAuthType} />
+
+      <Home />
+
+      {authType && (
+        <AuthModal type={authType} close={() => setAuthType(null)} />
+      )}
     </div>
   );
 }
