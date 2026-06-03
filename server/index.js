@@ -93,25 +93,37 @@ app.post("/save-user", async (req, res) => {
 // Upload Resume API
 
 app.post(
-  "/upload-resume",
-  upload.single("resume"),
+  "/upload-resumes",
+  upload.array("resumes", 20),
   async (req, res) => {
     try {
-      const { userEmail, featureType } = req.body;
-
-      const resume = new Resume({
+      const {
         userEmail,
-        fileName: req.file.originalname,
-        filePath: req.file.path,
-        featureType
-      });
+        featureType,
+        jobDescription,
+        skills
+      } = req.body;
 
-      await resume.save();
+      const uploadedResumes = [];
+
+      for (const file of req.files) {
+        const resume = new Resume({
+          userEmail,
+          fileName: file.originalname,
+          filePath: file.path,
+          featureType,
+          jobDescription,
+          skills: JSON.parse(skills || "[]")
+        });
+
+        await resume.save();
+        uploadedResumes.push(resume);
+      }
 
       res.json({
         success: true,
-        message: "Resume uploaded successfully",
-        resume
+        count: uploadedResumes.length,
+        resumes: uploadedResumes
       });
 
     } catch (error) {

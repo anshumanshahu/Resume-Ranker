@@ -5,6 +5,9 @@ const ResumeSchema = new mongoose.Schema({
   fileName: String,
   filePath: String,
   featureType: String,
+  jobDescription: String,
+  skills: [String],
+
   uploadedAt: {
     type: Date,
     default: Date.now
