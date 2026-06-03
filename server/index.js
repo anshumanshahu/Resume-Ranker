@@ -1,20 +1,50 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const multer = require("multer");
+const path = require("path");
+
 require("dotenv").config();
+
+const Resume = require("./models/Resume");
 
 const app = express();
 
-// middleware
+
+// Multer Storage
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
+
+// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connect (SAFE via .env)
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch((err) => console.log("MongoDB Error:", err));
 
-// Schema
+app.use("/uploads", express.static("uploads"));
+
+
+// MongoDB Connection
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log("MongoDB Error:", err));
+
+
+// User Schema
+
 const UserSchema = new mongoose.Schema({
   name: String,
   email: {
@@ -25,31 +55,101 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema);
 
-// API: Save user
+
+// Save User API
 app.post("/save-user", async (req, res) => {
   const { name, email } = req.body;
 
   try {
-    // check duplicate
     let user = await User.findOne({ email });
 
     if (!user) {
-      user = new User({ name, email });
+      user = new User({
+        name,
+        email
+      });
+
       await user.save();
     }
 
     res.json({
+      success: true,
       message: "User saved successfully",
       user
     });
 
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: "Server error" });
+
+    res.status(500).json({
+      success: false,
+      error: "Server error"
+    });
   }
 });
 
-// start server
+
+// Upload Resume API
+
+app.post(
+  "/upload-resume",
+  upload.single("resume"),
+  async (req, res) => {
+    try {
+      const { userEmail, featureType } = req.body;
+
+      const resume = new Resume({
+        userEmail,
+        fileName: req.file.originalname,
+        filePath: req.file.path,
+        featureType
+      });
+
+      await resume.save();
+
+      res.json({
+        success: true,
+        message: "Resume uploaded successfully",
+        resume
+      });
+
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).json({
+        success: false,
+        message: "Upload failed"
+      });
+    }
+  }
+);
+
+
+// Resume History API
+app.get("/history/:email", async (req, res) => {
+  try {
+    const resumes = await Resume.find({
+      userEmail: req.params.email
+    }).sort({ uploadedAt: -1 });
+
+    res.json(resumes);
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch history"
+    });
+  }
+});
+
+
+app.get("/", (req, res) => {
+  res.send("Resume Ranker Backend Running");
+});
+
+
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
