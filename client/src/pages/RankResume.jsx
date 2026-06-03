@@ -49,56 +49,76 @@ function RankResume() {
     );
   };
 
-  const handleUpload = async () => {
-    if (!auth.currentUser) {
-      alert("Please login first");
-      return;
-    }
+ const handleUpload = async () => {
+  if (!auth.currentUser) {
+    alert("Please login first");
+    return;
+  }
 
-    if (files.length === 0) {
-      alert("Please select a resume");
-      return;
-    }
+  if (files.length === 0) {
+    alert("Please select resumes");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    const formData = new FormData();
+  const formData = new FormData();
 
-    formData.append("resume", file);
-    formData.append("userEmail", auth.currentUser.email);
-    formData.append("featureType", "rank-resume");
-    formData.append("jobDescription", jobDescription);
-    formData.append(
-      "skills",
-      JSON.stringify(selectedSkills)
+  // Multiple Resume Upload
+  files.forEach((file) => {
+    formData.append("resumes", file);
+  });
+
+  formData.append(
+    "userEmail",
+    auth.currentUser.email
+  );
+
+  formData.append(
+    "featureType",
+    "rank-resume"
+  );
+
+  formData.append(
+    "jobDescription",
+    jobDescription
+  );
+
+  formData.append(
+    "skills",
+    JSON.stringify(selectedSkills)
+  );
+
+  try {
+    const response = await fetch(
+      "http://localhost:5000/upload-resumes",
+      {
+        method: "POST",
+        body: formData,
+      }
     );
 
-    try {
-      const response = await fetch(
-        "http://localhost:5000/upload-resume",
-        {
-          method: "POST",
-          body: formData,
-        }
+    const data = await response.json();
+
+    console.log(data);
+
+    if (data.success) {
+      alert(
+        `${data.count} resumes uploaded successfully`
       );
 
-      const data = await response.json();
-
-      console.log(data);
-
-      alert("Resume uploaded successfully");
-
-      setFile(null);
+      setFiles([]);
       setJobDescription("");
       setSelectedSkills([]);
-
-    } catch (error) {
-      console.log(error);
-      alert("Upload failed");
+      setSkillInput("");
     }
+  } catch (error) {
+    console.log(error);
+    alert("Upload failed");
+  }
 
-    setLoading(false);
-  };
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen bg-slate-950 text-white px-6 py-12">
@@ -193,24 +213,32 @@ function RankResume() {
             Upload Resume
           </label>
 
-          <input
+         <input
   type="file"
   multiple
   accept=".pdf,.doc,.docx"
-  onChange={(e) => setFiles([...e.target.files])}
+  onChange={(e) =>
+    setFiles(Array.from(e.target.files))
+  }
+  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-700"
 />
 
           {files.length > 0 && (
-  <div className="mb-6">
-    <p className="text-green-400 mb-2">
-      Selected Resumes:
+  <div className="mb-6 mt-4">
+    <p className="text-green-400 mb-2 font-medium">
+      Selected Resumes ({files.length})
     </p>
 
-    {files.map((file, index) => (
-      <div key={index} className="text-slate-300">
-        {file.name}
-      </div>
-    ))}
+    <div className="space-y-2">
+      {files.map((file, index) => (
+        <div
+          key={index}
+          className="bg-slate-800 px-4 py-2 rounded-lg"
+        >
+          {file.name}
+        </div>
+      ))}
+    </div>
   </div>
 )}
 
