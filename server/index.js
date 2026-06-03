@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
+const Skill = require("./models/Skill");
 
 require("dotenv").config();
 
@@ -144,7 +145,31 @@ app.get("/history/:email", async (req, res) => {
   }
 });
 
+// Skills Search API
 
+app.get("/skills", async (req, res) => {
+  try {
+    const search = req.query.search || "";
+
+    const skills = await Skill.find({
+      name: {
+        $regex: search,
+        $options: "i"
+      }
+    })
+    .limit(10);
+
+    res.json(skills);
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch skills"
+    });
+  }
+});
 app.get("/", (req, res) => {
   res.send("Resume Ranker Backend Running");
 });
