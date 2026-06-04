@@ -7,7 +7,7 @@ const Skill = require("./models/Skill");
 const fs = require("fs");
 const pdf = require("pdf-parse");
 const mammoth = require("mammoth");
-const pdfData = await pdf(dataBuffer);
+
 
 require("dotenv").config();
 
@@ -111,46 +111,75 @@ app.post(
       const uploadedResumes = [];
 
       for (const file of req.files) {
-        let extractedText = "";
+  let extractedText = "";
 
-const extension = path.extname(
-  file.originalname
-).toLowerCase();
+  const extension = path
+    .extname(file.originalname)
+    .toLowerCase();
 
-if (extension === ".pdf") {
-  const dataBuffer = fs.readFileSync(file.path);
+  if (extension === ".pdf") {
+    try {
+      console.log(
+        "Processing PDF:",
+        file.originalname
+      );
 
-  const pdfData = await pdfParse(
-    dataBuffer
-  );
+      const dataBuffer = fs.readFileSync(
+        file.path
+      );
 
-  extractedText = pdfData.text;
+      const pdfData = await pdf(
+        dataBuffer
+      );
+
+      extractedText = pdfData.text;
+
+      console.log(
+        "Extracted PDF chars:",
+        extractedText.length
+      );
+    } catch (err) {
+      console.log(
+        "PDF Extraction Error:",
+        err
+      );
+    }
+  }
+
+  if (extension === ".docx") {
+    try {
+      const result =
+        await mammoth.extractRawText({
+          path: file.path
+        });
+
+      extractedText = result.value;
+
+      console.log(
+        "Extracted DOCX chars:",
+        extractedText.length
+      );
+    } catch (err) {
+      console.log(
+        "DOCX Extraction Error:",
+        err
+      );
+    }
+  }
+
+  const resume = new Resume({
+    userEmail,
+    fileName: file.originalname,
+    filePath: file.path,
+    extractedText,
+    featureType,
+    jobDescription,
+    skills: JSON.parse(skills || "[]")
+  });
+
+  await resume.save();
+  uploadedResumes.push(resume);
 }
-
-if (extension === ".docx") {
-  const result =
-    await mammoth.extractRawText({
-      path: file.path
-    });
-
-  extractedText = result.value;
-}
-
-const resume = new Resume({
-  userEmail,
-  fileName: file.originalname,
-  filePath: file.path,
-
-  extractedText,
-
-  featureType,
-  jobDescription,
-  skills: JSON.parse(skills || "[]")
-});
-
-        await resume.save();
-        uploadedResumes.push(resume);
-      }
 
       res.json({
         success: true,
