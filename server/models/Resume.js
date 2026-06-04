@@ -2,13 +2,20 @@ const mongoose = require("mongoose");
 
 const ResumeSchema = new mongoose.Schema({
   userEmail: String,
+
   fileName: String,
+
   filePath: String,
 
-  extractedText: String, // NEW
+  extractedText: {
+    type: String,
+    default: ""
+  },
 
   featureType: String,
+
   jobDescription: String,
+
   skills: [String],
 
   uploadedAt: {
@@ -17,4 +24,7 @@ const ResumeSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model("Resume", ResumeSchema);
+module.exports = mongoose.model(
+  "Resume",
+  ResumeSchema
+);

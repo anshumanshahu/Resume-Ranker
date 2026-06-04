@@ -4,6 +4,10 @@ const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
 const Skill = require("./models/Skill");
+const fs = require("fs");
+const pdf = require("pdf-parse");
+const mammoth = require("mammoth");
+const pdfData = await pdf(dataBuffer);
 
 require("dotenv").config();
 
@@ -107,14 +111,42 @@ app.post(
       const uploadedResumes = [];
 
       for (const file of req.files) {
-        const resume = new Resume({
-          userEmail,
-          fileName: file.originalname,
-          filePath: file.path,
-          featureType,
-          jobDescription,
-          skills: JSON.parse(skills || "[]")
-        });
+        let extractedText = "";
+
+const extension = path.extname(
+  file.originalname
+).toLowerCase();
+
+if (extension === ".pdf") {
+  const dataBuffer = fs.readFileSync(file.path);
+
+  const pdfData = await pdfParse(
+    dataBuffer
+  );
+
+  extractedText = pdfData.text;
+}
+
+if (extension === ".docx") {
+  const result =
+    await mammoth.extractRawText({
+      path: file.path
+    });
+
+  extractedText = result.value;
+}
+
+const resume = new Resume({
+  userEmail,
+  fileName: file.originalname,
+  filePath: file.path,
+
+  extractedText,
+
+  featureType,
+  jobDescription,
+  skills: JSON.parse(skills || "[]")
+});
 
         await resume.save();
         uploadedResumes.push(resume);
