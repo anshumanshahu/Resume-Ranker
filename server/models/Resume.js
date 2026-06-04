@@ -4,6 +4,9 @@ const ResumeSchema = new mongoose.Schema({
   userEmail: String,
   fileName: String,
   filePath: String,
+
+  extractedText: String, // NEW
+
   featureType: String,
   jobDescription: String,
   skills: [String],
