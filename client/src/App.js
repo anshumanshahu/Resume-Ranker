@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import RankResume from "./pages/RankResume";
 import AuthModal from "./components/AuthModal";
+import RankingResults from "./pages/RankingResults";
 
 import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -38,9 +39,18 @@ function App() {
       />
 
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/rank-resume" element={<RankResume />} />
-      </Routes>
+  <Route path="/" element={<Home />} />
+
+  <Route
+    path="/rank-resume"
+    element={<RankResume />}
+  />
+
+  <Route
+    path="/ranking-results"
+    element={<RankingResults />}
+  />
+</Routes>
 
       {authType && (
         <AuthModal

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "../firebase";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 function RankResume() {
   const [jobDescription, setJobDescription] = useState("");
@@ -11,28 +12,30 @@ function RankResume() {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState([]);
 
-  useEffect(() => {
-    const fetchSkills = async () => {
-      if (!skillInput.trim()) {
-        setSuggestions([]);
-        return;
-      }
+  const navigate = useNavigate();
 
-      try {
-        const res = await fetch(
-          `http://localhost:5000/skills?search=${skillInput}`
-        );
+useEffect(() => {
+  const fetchSkills = async () => {
+    if (!skillInput.trim()) {
+      setSuggestions([]);
+      return;
+    }
 
-        const data = await res.json();
-        setSuggestions(data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+    try {
+      const res = await fetch(
+        `http://localhost:5000/skills?search=${skillInput}`
+      );
 
-    const timer = setTimeout(fetchSkills, 300);
-    return () => clearTimeout(timer);
-  }, [skillInput]);
+      const data = await res.json();
+      setSuggestions(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const timer = setTimeout(fetchSkills, 300);
+  return () => clearTimeout(timer);
+}, [skillInput]);
 
   const addSkill = (skill) => {
     if (!selectedSkills.includes(skill)) {
@@ -102,16 +105,18 @@ function RankResume() {
 
     console.log(data);
 
-    if (data.success) {
-      alert(
-        `${data.count} resumes uploaded successfully`
-      );
+   if (data.success) {
+  setFiles([]);
+  setJobDescription("");
+  setSelectedSkills([]);
+  setSkillInput("");
 
-      setFiles([]);
-      setJobDescription("");
-      setSelectedSkills([]);
-      setSkillInput("");
+  navigate("/ranking-results", {
+    state: {
+      resumes: data.resumes
     }
+  });
+}
   } catch (error) {
     console.log(error);
     alert("Upload failed");

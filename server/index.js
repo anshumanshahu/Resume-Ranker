@@ -12,7 +12,8 @@ const mammoth = require("mammoth");
 require("dotenv").config();
 
 const Resume = require("./models/Resume");
-
+const getEmbedding = require("./services/rankResume");
+const cosineSimilarity = require("./services/cosineSimilarity");
 const app = express();
 
 
@@ -117,13 +118,9 @@ app.post(
     .extname(file.originalname)
     .toLowerCase();
 
+  // PDF Extraction
   if (extension === ".pdf") {
     try {
-      console.log(
-        "Processing PDF:",
-        file.originalname
-      );
-
       const dataBuffer = fs.readFileSync(
         file.path
       );
@@ -146,6 +143,7 @@ app.post(
     }
   }
 
+  // DOCX Extraction
   if (extension === ".docx") {
     try {
       const result =
@@ -167,17 +165,65 @@ app.post(
     }
   }
 
+  // AI JD Match Score
+  let jdMatchScore = 0;
+
+  try {
+    if (
+      extractedText &&
+      extractedText.trim() &&
+      jobDescription &&
+      jobDescription.trim()
+    ) {
+      const jdEmbedding =
+        await getEmbedding(
+          jobDescription
+        );
+
+      const resumeEmbedding =
+        await getEmbedding(
+          extractedText
+        );
+
+      const similarity =
+        cosineSimilarity(
+          jdEmbedding,
+          resumeEmbedding
+        );
+
+      jdMatchScore = Math.round(
+        similarity * 100
+      );
+
+      console.log(
+        `${file.originalname} Score: ${jdMatchScore}`
+      );
+    }
+  } catch (err) {
+    console.log(
+      "AI Ranking Error:",
+      err.message
+    );
+  }
+
   const resume = new Resume({
     userEmail,
     fileName: file.originalname,
     filePath: file.path,
+
     extractedText,
+
+    jdMatchScore,
+
     featureType,
     jobDescription,
-    skills: JSON.parse(skills || "[]")
+    skills: JSON.parse(
+      skills || "[]"
+    )
   });
 
   await resume.save();
+
   uploadedResumes.push(resume);
 }
 
