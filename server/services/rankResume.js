@@ -1,33 +1,23 @@
-const { HfInference } = require("@huggingface/inference");
+const getEmbedding = require("./getEmbedding");
 const cosineSimilarity = require("./cosineSimilarity");
-
-const hf = new HfInference(process.env.HF_API_KEY);
-
-async function getEmbedding(text) {
-  const embedding = await hf.featureExtraction({
-    model: "sentence-transformers/all-mpnet-base-v2",
-    inputs: text.substring(0, 5000),
-  });
-
-  return embedding;
-}
 
 async function rankResume(resumeText, jobDescription) {
   try {
-    console.log("Generating resume embedding...");
-    const resumeEmbedding = await getEmbedding(resumeText);
+    const resumeEmbedding =
+      await getEmbedding(resumeText);
 
-    console.log("Generating JD embedding...");
-    const jdEmbedding = await getEmbedding(jobDescription);
+    const jdEmbedding =
+      await getEmbedding(jobDescription);
 
-    const similarity =
-      cosineSimilarity(resumeEmbedding, jdEmbedding);
-
-    const score = Math.round(similarity * 100);
+    const similarity =  
+      cosineSimilarity(
+        resumeEmbedding,
+        jdEmbedding
+      );
 
     return {
-      score,
       similarity,
+      score: Math.round(similarity * 100),
     };
   } catch (error) {
     console.error("AI Ranking Error:", error);

@@ -12,8 +12,8 @@ function RankingResults() {
         if (!auth.currentUser) return;
 
         const response = await fetch(
-          `http://localhost:5000/ranked-resumes/${auth.currentUser.email}`
-        );
+  `http://localhost:5000/ranked-resumes/${auth.currentUser.email}`
+);
 
         const data = await response.json();
 
@@ -109,7 +109,7 @@ function RankingResults() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-4 mt-8">
+                <div className="grid md:grid-cols-1 gap-4 mt-8">
 
                   <div className="bg-slate-950 rounded-xl p-4 border border-slate-800">
                     <p className="text-slate-400 text-sm">
@@ -122,34 +122,34 @@ function RankingResults() {
                   </div>
 
                   <div className="bg-slate-950 rounded-xl p-4 border border-slate-800">
-                    <p className="text-slate-400 text-sm">
-                      Skills Match
-                    </p>
+  <p className="text-slate-400 text-sm">
+    Skills Match
+  </p>
 
-                    <h3 className="text-3xl font-bold text-purple-400">
-                      {resume.skillsMatchScore || 0}%
-                    </h3>
-                  </div>
+  <h3 className="text-3xl font-bold text-purple-400">
+    {resume.skillMatchScore || 0}%
+  </h3>
+</div>
 
-                  <div className="bg-slate-950 rounded-xl p-4 border border-slate-800">
-                    <p className="text-slate-400 text-sm">
-                      Experience
-                    </p>
+<div className="bg-slate-950 rounded-xl p-4 border border-slate-800">
+  <p className="text-slate-400 text-sm">
+    Experience
+  </p>
 
-                    <h3 className="text-3xl font-bold text-orange-400">
-                      {resume.experienceScore || 0}%
-                    </h3>
-                  </div>
+  <h3 className="text-3xl font-bold text-orange-400">
+    {resume.experienceScore || 0}%
+  </h3>
+</div>
 
-                  <div className="bg-slate-950 rounded-xl p-4 border border-slate-800">
-                    <p className="text-slate-400 text-sm">
-                      Education
-                    </p>
+<div className="bg-slate-950 rounded-xl p-4 border border-slate-800">
+  <p className="text-slate-400 text-sm">
+    Education
+  </p>
 
-                    <h3 className="text-3xl font-bold text-pink-400">
-                      {resume.educationScore || 0}%
-                    </h3>
-                  </div>
+  <h3 className="text-3xl font-bold text-pink-400">
+    {resume.educationScore || 0}%
+  </h3>
+</div>
 
                 </div>
 

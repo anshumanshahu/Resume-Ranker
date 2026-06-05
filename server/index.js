@@ -12,7 +12,7 @@ const mammoth = require("mammoth");
 require("dotenv").config();
 
 const Resume = require("./models/Resume");
-const getEmbedding = require("./services/rankResume");
+const getEmbedding = require("./services/getEmbedding");
 const cosineSimilarity = require("./services/cosineSimilarity");
 const app = express();
 
@@ -110,7 +110,7 @@ app.post(
       } = req.body;
 
       const uploadedResumes = [];
-
+      const batchId = Date.now().toString();
       for (const file of req.files) {
   let extractedText = "";
 
@@ -170,35 +170,30 @@ app.post(
 
   try {
     if (
-      extractedText &&
-      extractedText.trim() &&
-      jobDescription &&
-      jobDescription.trim()
-    ) {
-      const jdEmbedding =
-        await getEmbedding(
-          jobDescription
-        );
+  extractedText &&
+  extractedText.trim() &&
+  jobDescription &&
+  jobDescription.trim()
+) {
+  const jdEmbedding =
+    await getEmbedding(jobDescription);
 
-      const resumeEmbedding =
-        await getEmbedding(
-          extractedText
-        );
+  const resumeEmbedding =
+    await getEmbedding(extractedText);
 
-      const similarity =
-        cosineSimilarity(
-          jdEmbedding,
-          resumeEmbedding
-        );
+  const similarity =
+    cosineSimilarity(
+      resumeEmbedding,
+      jdEmbedding
+    );
 
-      jdMatchScore = Math.round(
-        similarity * 100
-      );
+  jdMatchScore =
+    Math.round(similarity * 100);
 
-      console.log(
-        `${file.originalname} Score: ${jdMatchScore}`
-      );
-    }
+  console.log(
+    `${file.originalname} Score: ${jdMatchScore}`
+  );
+}
   } catch (err) {
     console.log(
       "AI Ranking Error:",
@@ -208,6 +203,7 @@ app.post(
 
   const resume = new Resume({
     userEmail,
+    batchId,
     fileName: file.originalname,
     filePath: file.path,
 
@@ -260,6 +256,37 @@ app.get("/history/:email", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch history"
+    });
+  }
+});
+
+app.get("/ranked-resumes/:email", async (req, res) => {
+  try {
+
+    const latestResume = await Resume
+      .findOne({
+        userEmail: req.params.email
+      })
+      .sort({ uploadedAt: -1 });
+
+    if (!latestResume) {
+      return res.json([]);
+    }
+
+    const resumes = await Resume.find({
+      userEmail: req.params.email,
+      batchId: latestResume.batchId
+    }).sort({
+      jdMatchScore: -1
+    });
+
+    res.json(resumes);
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      success: false
     });
   }
 });
