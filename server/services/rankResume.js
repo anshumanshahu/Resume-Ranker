@@ -1,38 +1,38 @@
-const axios = require("axios");
+const { HfInference } = require("@huggingface/inference");
+const cosineSimilarity = require("./cosineSimilarity");
+
+const hf = new HfInference(process.env.HF_API_KEY);
 
 async function getEmbedding(text) {
+  const embedding = await hf.featureExtraction({
+    model: "sentence-transformers/all-mpnet-base-v2",
+    inputs: text.substring(0, 5000),
+  });
+
+  return embedding;
+}
+
+async function rankResume(resumeText, jobDescription) {
   try {
-    const response = await axios.post(
-      "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-mpnet-base-v2",
-      {
-        inputs: text.substring(0, 5000)
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.HF_API_KEY}`,
-          "Content-Type": "application/json"
-        }   
-      }
-    );
+    console.log("Generating resume embedding...");
+    const resumeEmbedding = await getEmbedding(resumeText);
 
-    let embedding = response.data;
+    console.log("Generating JD embedding...");
+    const jdEmbedding = await getEmbedding(jobDescription);
 
-    // Handle nested array response
-    if (
-      Array.isArray(embedding) &&
-      Array.isArray(embedding[0])
-    ) {
-      embedding = embedding[0];
-    }
+    const similarity =
+      cosineSimilarity(resumeEmbedding, jdEmbedding);
 
-    return embedding;
+    const score = Math.round(similarity * 100);
+
+    return {
+      score,
+      similarity,
+    };
   } catch (error) {
-    console.error(
-      "Embedding Error:",
-      error.response?.data || error.message
-    );
+    console.error("AI Ranking Error:", error);
     throw error;
   }
 }
 
-module.exports = getEmbedding;
+module.exports = rankResume;
