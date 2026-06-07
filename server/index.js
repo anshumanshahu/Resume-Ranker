@@ -200,23 +200,63 @@ app.post(
       err.message
     );
   }
+// Skills Match Score
 
-  const resume = new Resume({
-    userEmail,
-    batchId,
-    fileName: file.originalname,
-    filePath: file.path,
+const requiredSkills =
+  JSON.parse(skills || "[]");
 
-    extractedText,
+const matchedSkills =
+  requiredSkills.filter((skill) =>
+    extractedText
+      .toLowerCase()
+      .includes(skill.toLowerCase())
+  );
+  const missingSkills =
+  requiredSkills.filter(
+    (skill) =>
+      !extractedText
+        .toLowerCase()
+        .includes(skill.toLowerCase())
+  );
 
-    jdMatchScore,
+const skillMatchScore =
+  requiredSkills.length > 0
+    ? Math.round(
+        (matchedSkills.length /
+          requiredSkills.length) *
+          100
+      )
+    : 0;
 
-    featureType,
-    jobDescription,
-    skills: JSON.parse(
-      skills || "[]"
-    )
-  });
+console.log(
+  "Matched Skills:",
+  matchedSkills
+);
+
+console.log(
+  "Skill Match Score:",
+  skillMatchScore
+);
+const resume = new Resume({
+  userEmail,
+  batchId,
+
+  fileName: file.originalname,
+  filePath: file.path,
+
+  extractedText,
+
+  jdMatchScore,
+  skillMatchScore,
+
+  matchedSkills,
+  missingSkills,
+
+  featureType,
+  jobDescription,
+
+  skills: requiredSkills
+});
 
   await resume.save();
 

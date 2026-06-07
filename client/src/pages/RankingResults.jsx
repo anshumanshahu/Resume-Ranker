@@ -172,6 +172,44 @@ function RankingResults() {
                   </div>
                 )}
 
+                {resume.matchedSkills?.length > 0 && (
+  <div className="mt-4">
+    <h4 className="text-green-400 font-semibold mb-2">
+      Matched Skills
+    </h4>
+
+    <div className="flex flex-wrap gap-2">
+      {resume.matchedSkills.map((skill) => (
+        <span
+          key={skill}
+          className="bg-green-600 px-3 py-1 rounded-full text-sm"
+        >
+          {skill}
+        </span>
+      ))}
+    </div>
+  </div>
+)}
+
+{resume.missingSkills?.length > 0 && (
+  <div className="mt-4">
+    <h4 className="text-red-400 font-semibold mb-2">
+      Missing Skills
+    </h4>
+
+    <div className="flex flex-wrap gap-2">
+      {resume.missingSkills.map((skill) => (
+        <span
+          key={skill}
+          className="bg-red-600 px-3 py-1 rounded-full text-sm"
+        >
+          {skill}
+        </span>
+      ))}
+    </div>
+  </div>
+)}
+
                 <div className="flex flex-wrap gap-4 mt-8">
 
                   <a

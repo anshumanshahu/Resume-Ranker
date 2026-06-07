@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const ResumeSchema = new mongoose.Schema({
   userEmail: String,
 
-  batchId: String, // ADD THIS
+  batchId: String,
 
   fileName: String,
   filePath: String,
@@ -17,6 +17,17 @@ const ResumeSchema = new mongoose.Schema({
   jobDescription: String,
 
   skills: [String],
+
+  // NEW FIELDS
+  matchedSkills: {
+    type: [String],
+    default: []
+  },
+
+  missingSkills: {
+    type: [String],
+    default: []
+  },
 
   jdMatchScore: {
     type: Number,
@@ -48,8 +59,15 @@ const ResumeSchema = new mongoose.Schema({
     default: 0
   },
 
-  strengths: [String],
-  weaknesses: [String],
+  strengths: {
+    type: [String],
+    default: []
+  },
+
+  weaknesses: {
+    type: [String],
+    default: []
+  },
 
   uploadedAt: {
     type: Date,
