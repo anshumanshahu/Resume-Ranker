@@ -203,7 +203,7 @@ function RankingResults() {
                               rel="noreferrer"
                               className="text-blue-400 hover:underline"
                             >
-                              View Profile ↗
+                              View Profile 
                             </a>
                           ) : (
                             <span className="text-slate-600">Not Found</span>
@@ -218,7 +218,7 @@ function RankingResults() {
                               rel="noreferrer"
                               className="text-blue-400 hover:underline"
                             >
-                              View Profile ↗
+                              View Profile
                             </a>
                           ) : (
                             <span className="text-slate-600">Not Found</span>
