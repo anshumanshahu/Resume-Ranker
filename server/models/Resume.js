@@ -63,6 +63,15 @@ const ResumeSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
+  aiSummary: {
+  type: String,
+  default: ""
+},
+
+aiRecommendation: {
+  type: String,
+  default: ""
+},
 
   weaknesses: {
     type: [String],
