@@ -15,18 +15,34 @@ const extractPhone = (text) => {
 
 const extractGithub = (text) => {
   if (!text) return null;
+
   const match = text.match(
-    /(?:https?:\/\/)?(?:www\.)?github\.com\/[A-Za-z0-9_-]+/gi
+    /(?:https?:\/\/)?(?:www\.)?github\.com\/[A-Za-z0-9_-]+/i
   );
-  return match?.[0] || null;
+
+  if (!match) return null;
+
+  const url = match[0];
+
+  return url.startsWith("http")
+    ? url
+    : `https://${url}`;
 };
 
 const extractLinkedin = (text) => {
   if (!text) return null;
+
   const match = text.match(
-    /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+/gi
+    /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[A-Za-z0-9_-]+/i
   );
-  return match?.[0] || null;
+
+  if (!match) return null;
+
+  const url = match[0];
+
+  return url.startsWith("http")
+    ? url
+    : `https://${url}`;
 };
 
 const extractName = (text) => {
