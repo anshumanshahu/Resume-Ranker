@@ -7,7 +7,7 @@ const Skill = require("./models/Skill");
 const fs = require("fs");
 const pdf = require("pdf-parse");
 const mammoth = require("mammoth");
-
+const getAIAnalysis = require("./services/getAIAnalysis");
 
 require("dotenv").config();
 
