@@ -227,6 +227,26 @@ const skillMatchScore =
           100
       )
     : 0;
+    let aiSummary = "";
+let aiRecommendation = "";
+
+try {
+  aiSummary =
+    await getAIAnalysis(
+      extractedText,
+      jobDescription
+    );
+
+  aiRecommendation =
+    jdMatchScore >= 80
+      ? "Recommended for Interview"
+      : jdMatchScore >= 60
+      ? "Technical Screening Recommended"
+      : "Needs Further Review";
+
+} catch (err) {
+  console.log(err);
+}
 
 console.log(
   "Matched Skills:",
@@ -251,6 +271,9 @@ const resume = new Resume({
 
   matchedSkills,
   missingSkills,
+
+  aiSummary,
+  aiRecommendation,
 
   featureType,
   jobDescription,
