@@ -8,7 +8,6 @@ const fs = require("fs");
 const pdf = require("pdf-parse");
 const mammoth = require("mammoth");
 const getAIAnalysis = require("./services/getAIAnalysis");
-
 require("dotenv").config();
 
 const Resume = require("./models/Resume");
@@ -166,8 +165,9 @@ app.post(
   }
 
   // AI JD Match Score
-  let jdMatchScore = 0;
-
+let jdMatchScore = 0;
+let aiSummary = "";
+let recommendation = "";
   try {
     if (
   extractedText &&
@@ -180,15 +180,39 @@ app.post(
 
   const resumeEmbedding =
     await getEmbedding(extractedText);
+console.log("JD Embedding Length:", jdEmbedding.length);
+console.log("Resume Embedding Length:", resumeEmbedding.length);
 
   const similarity =
     cosineSimilarity(
       resumeEmbedding,
       jdEmbedding
     );
+console.log("Similarity:", similarity);
 
+jdMatchScore =
+  Math.round(similarity * 100);
+
+console.log("JD Match Score:", jdMatchScore);
   jdMatchScore =
     Math.round(similarity * 100);
+    const aiResponse =
+  await getAIAnalysis(
+    extractedText,
+    jobDescription
+  );
+
+aiSummary = aiResponse;
+
+if (jdMatchScore >= 80) {
+  recommendation = "Strong Candidate";
+}
+else if (jdMatchScore >= 60) {
+  recommendation = "Good Fit";
+}
+else {
+  recommendation = "Needs Review";
+}
 
   console.log(
     `${file.originalname} Score: ${jdMatchScore}`
@@ -227,26 +251,6 @@ const skillMatchScore =
           100
       )
     : 0;
-    let aiSummary = "";
-let aiRecommendation = "";
-
-try {
-  aiSummary =
-    await getAIAnalysis(
-      extractedText,
-      jobDescription
-    );
-
-  aiRecommendation =
-    jdMatchScore >= 80
-      ? "Recommended for Interview"
-      : jdMatchScore >= 60
-      ? "Technical Screening Recommended"
-      : "Needs Further Review";
-
-} catch (err) {
-  console.log(err);
-}
 
 console.log(
   "Matched Skills:",
@@ -273,7 +277,7 @@ const resume = new Resume({
   missingSkills,
 
   aiSummary,
-  aiRecommendation,
+  recommendation,
 
   featureType,
   jobDescription,
