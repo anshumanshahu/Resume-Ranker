@@ -1,20 +1,6 @@
 const axios = require("axios");
-const content =
-  response.data.choices[0].message.content;
 
-console.log("RAW AI RESPONSE:");
-console.log(content);
-
-const cleaned = content
-  .replace(/```json/g, "")
-  .replace(/```/g, "")
-  .trim();
-
-return JSON.parse(cleaned);
-async function getSkillMatch(
-  resumeText,
-  requiredSkills
-) {
+async function getSkillMatch(resumeText, requiredSkills) {
   try {
     const response = await axios.post(
       "https://router.huggingface.co/v1/chat/completions",
@@ -38,7 +24,7 @@ Example:
 
 {
   "matchedSkills": ["Python"],
-  "missingSkills": ["Docker"]
+  "missingSkills": [""]
 }
 `
           }
@@ -51,12 +37,22 @@ Example:
       }
     );
 
-    return JSON.parse(
-      response.data.choices[0].message.content
-    );
+    
+    const content = response.data.choices[0].message.content;
+
+    console.log("RAW AI RESPONSE:");
+    console.log(content);
+
+    
+    const cleaned = content
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    return JSON.parse(cleaned);
 
   } catch (err) {
-    console.log(err.message);
+    console.log("Error in getSkillMatch:", err.message);
 
     return {
       matchedSkills: [],

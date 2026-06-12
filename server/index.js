@@ -9,6 +9,8 @@ const pdf = require("pdf-parse");
 const mammoth = require("mammoth");
 const getAIAnalysis = require("./services/getAIAnalysis");
 require("dotenv").config();
+const getSkillMatch =
+  require("./services/getSkillMatch");
 
 const Resume = require("./models/Resume");
 const getEmbedding = require("./services/getEmbedding");
@@ -229,41 +231,13 @@ else {
 const requiredSkills =
   JSON.parse(skills || "[]");
 
-const matchedSkills = [];
-const missingSkills = [];
-
-const resumeEmbedding =
-  await getEmbedding(extractedText);
-
-for (const skill of requiredSkills) {
-  try {
-    const skillEmbedding =
-      await getEmbedding(skill);
-
-    const similarity =
-      cosineSimilarity(
-        resumeEmbedding,
-        skillEmbedding
-      );
-
-    console.log(
-      `${skill} similarity:`,
-      similarity
-    );
-
-    if (similarity >= 0.40) {
-      matchedSkills.push(skill);
-    } else {
-      missingSkills.push(skill);
-    }
-
-  } catch (err) {
-    console.log(
-      `Skill AI Error (${skill}):`,
-      err.message
-    );
-  }
-}
+const {
+  matchedSkills,
+  missingSkills
+} = await getSkillMatch(
+  extractedText,
+  requiredSkills
+);
 
 const skillMatchScore =
   requiredSkills.length > 0
