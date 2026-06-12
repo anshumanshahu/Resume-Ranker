@@ -68,7 +68,7 @@ const ResumeSchema = new mongoose.Schema({
   default: ""
 },
 
-Recommendation: {
+recommendation: {
   type: String,
   default: ""
 },
