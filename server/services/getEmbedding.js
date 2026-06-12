@@ -12,6 +12,10 @@ async function getEmbedding(text) {
     inputs: text.substring(0, 5000),
   });
 
+  console.log("Embedding generated");
+  console.log("Embedding length:", embedding.length);
+  console.log("First 5 values:", embedding.slice(0, 5));
+
   return embedding;
 }
 
