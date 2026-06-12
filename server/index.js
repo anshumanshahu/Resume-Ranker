@@ -229,19 +229,41 @@ else {
 const requiredSkills =
   JSON.parse(skills || "[]");
 
-const matchedSkills =
-  requiredSkills.filter((skill) =>
-    extractedText
-      .toLowerCase()
-      .includes(skill.toLowerCase())
-  );
-  const missingSkills =
-  requiredSkills.filter(
-    (skill) =>
-      !extractedText
-        .toLowerCase()
-        .includes(skill.toLowerCase())
-  );
+const matchedSkills = [];
+const missingSkills = [];
+
+const resumeEmbedding =
+  await getEmbedding(extractedText);
+
+for (const skill of requiredSkills) {
+  try {
+    const skillEmbedding =
+      await getEmbedding(skill);
+
+    const similarity =
+      cosineSimilarity(
+        resumeEmbedding,
+        skillEmbedding
+      );
+
+    console.log(
+      `${skill} similarity:`,
+      similarity
+    );
+
+    if (similarity >= 0.40) {
+      matchedSkills.push(skill);
+    } else {
+      missingSkills.push(skill);
+    }
+
+  } catch (err) {
+    console.log(
+      `Skill AI Error (${skill}):`,
+      err.message
+    );
+  }
+}
 
 const skillMatchScore =
   requiredSkills.length > 0
