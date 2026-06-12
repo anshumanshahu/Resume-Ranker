@@ -251,6 +251,17 @@ function RankingResults() {
                       <p className={`text-base font-bold mb-3 ${recommendation.color}`}>
                         {recommendation.text}
                       </p>
+                      {resume.aiSummary && (
+  <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 mt-4">
+    <h3 className="text-cyan-400 font-semibold mb-2">
+      AI Analysis
+    </h3>
+
+    <p className="text-sm text-slate-300 whitespace-pre-wrap">
+      {resume.aiSummary}
+    </p>
+  </div>
+)}
                       <div className="flex justify-between text-xs text-slate-400 mb-1">
                         <span>Hire Score</span>
                         <span>{resume.jdMatchScore || 0}%</span>
