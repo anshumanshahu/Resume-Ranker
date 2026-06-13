@@ -168,7 +168,9 @@ function Home() {
 
               <li>
                 <a
-                  href="#"
+                  href="https://anshumanshahu.vercel.app"
+                  target="_blank"
+                  rel="noreferrer"
                   className="hover:text-white"
                 >
                   My Portfolio
