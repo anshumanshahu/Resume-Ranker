@@ -164,7 +164,7 @@ function RankingResults() {
                       <div>
                         {index === 0 && (
                           <span className="inline-block bg-yellow-500 text-black text-xs font-bold px-3 py-0.5 rounded-full mb-2">
-                            🏆 Top Candidate
+                            Top Candidate
                           </span>
                         )}
                         <p className="font-semibold text-lg leading-tight">
